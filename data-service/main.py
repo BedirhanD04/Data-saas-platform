@@ -9,7 +9,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
     "http://localhost:3000",
-    "https://data-saas-platform-git-main-bedirhan5.vercel.app",
+    "https://data-saas-platform.vercel.app/",
 ],
     allow_methods=["*"],
     allow_headers=["*"],
