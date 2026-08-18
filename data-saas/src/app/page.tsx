@@ -27,7 +27,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("http://localhost:8000/analyze", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_URL}/analyze`, {
       method: "POST",
       body: formData,
     });
@@ -43,7 +43,7 @@ export default function Home() {
 
     const token = localStorage.getItem("token");
 
-    const datasetResponse = await fetch("http://localhost:4000/datasets", {
+    const datasetResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export default function Home() {
       return;
     }
 
-    fetch("http://localhost:4000/datasets", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -92,7 +92,7 @@ export default function Home() {
 
   async function deleteDataset(id: number) {
     const token = localStorage.getItem("token");
-    await fetch(`http://localhost:4000/datasets/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
