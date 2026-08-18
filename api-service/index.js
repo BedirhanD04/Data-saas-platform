@@ -9,7 +9,13 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://data-saas-platform.vercel.app",
+    "https://data-saas-platform-git-main-bedirhan5.vercel.app",
+  ],
+}));
 app.use(express.json());
 
 const pool = new Pool({
