@@ -9,7 +9,22 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-app.use(cors());
+const cors = require("cors");
+
+// CORS 
+const corsOptions = {
+  origin: [
+    "https://data-saas-platform-git-main-bedirhan5.vercel.app", // Vercel canlı adresiniz
+    /\.vercel\.app$/, // Tüm Vercel preview/deploy linklerine izin verir
+    "http://localhost:3000", // Yerel geliştirme ortamı
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 
