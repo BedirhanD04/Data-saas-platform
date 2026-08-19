@@ -1,17 +1,24 @@
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from io import BytesIO
 import pandas as pd
 
 app = FastAPI()
 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3000",
-    "https://data-saas-platform.vercel.app",
-    "https://data-saas-platform-git-main-bedirhan5.vercel.app",
-],
+        "http://localhost:3000",
+        "https://data-saas-platform.vercel.app",
+        "https://data-saas-platform-git-main-bedirhan5.vercel.app",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -25,7 +32,8 @@ def read_root():
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 @app.post("/analyze")
-async def analyze_file(file: UploadFile):
+@limiter.limit("20/15minutes")
+async def analyze_file(request: Request, file: UploadFile):
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large (max 10MB)")
