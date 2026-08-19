@@ -1,4 +1,4 @@
-# Veriye — Smart Data Analysis Platform
+# Smart Data Analysis Platform
 
 A full-stack B2B SaaS platform where users upload a CSV or Excel file and instantly get row/column statistics and auto-generated charts — no spreadsheet wrangling required.
 
