@@ -21,8 +21,12 @@ app.use(express.json());
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL?.includes("localhost")
-    ? false
-    : { rejectUnauthorized: true },
+  ? false
+  : {
+      ca: process.env.DATABASE_CA_CERT,
+      rejectUnauthorized: true,
+      checkServerIdentity: () => undefined,
+    },
 });
 
 const authLimiter = rateLimit({
