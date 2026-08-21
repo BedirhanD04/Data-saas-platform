@@ -11,17 +11,17 @@ export default function LoginPage() {
   async function handleLogin(){
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
       method: "POST",
+      credentials: "include",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({email, password})
     });
 
     const data = await response.json();
 
-    if(data.token){
-        localStorage.setItem("token", data.token);
-        router.push("/");
-    } else{
-        alert(data.error || data.message || "Login failed");
+    if (response.ok) {
+      router.push("/");
+    } else {
+      alert(data.error || data.message || "Login failed");
     }
   }
 

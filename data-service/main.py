@@ -1,4 +1,7 @@
-from fastapi import FastAPI, UploadFile, HTTPException, Request
+import os
+import jwt
+from dotenv import load_dotenv
+from fastapi import FastAPI, UploadFile, HTTPException, Request, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -6,7 +9,23 @@ from slowapi.errors import RateLimitExceeded
 from io import BytesIO
 import pandas as pd
 
+load_dotenv()
+
 app = FastAPI()
+
+JWT_SECRET = os.environ["JWT_SECRET"]
+
+def verify_token(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="No token provided")
+
+    token = authorization.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return decoded
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -33,7 +52,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 @app.post("/analyze")
 @limiter.limit("20/15minutes")
-async def analyze_file(request: Request, file: UploadFile):
+async def analyze_file(request: Request, file: UploadFile, user: dict = Depends(verify_token)):
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large (max 10MB)")

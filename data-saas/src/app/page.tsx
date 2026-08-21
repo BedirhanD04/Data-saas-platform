@@ -27,27 +27,26 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_URL}/analyze`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze`, {
       method: "POST",
+      credentials: "include",
       body: formData,
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.detail || "Something went wrong while analyzing the file.");
+      alert(data.detail || data.error || "Something went wrong while analyzing the file.");
       return;
     }
 
     setResult(data);
 
-    const token = localStorage.getItem("token");
-
     const datasetResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         filename: data.filename,
@@ -70,33 +69,34 @@ export default function Home() {
     : [];
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+      credentials: "include",
+    }).then((res) => {
+      if (!res.ok) {
+        router.push("/login");
+        return;
+      }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setDatasets(data));
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets`, {
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => setDatasets(data));
+    });
   }, []);
 
-  function handleLogout() {
-    localStorage.removeItem("token");
+  async function handleLogout() {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
     router.push("/login");
   }
 
   async function deleteDataset(id: number) {
-    const token = localStorage.getItem("token");
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/datasets/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     setDatasets((prev) => prev.filter((d) => d.id !== id));
